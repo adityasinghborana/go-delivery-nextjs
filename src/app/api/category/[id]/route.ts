@@ -8,10 +8,11 @@ const categoryUsecase = new CategoryUsecase(categoryRepository);
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = Number(params.id);
+    const { id: idStr } = await props.params;
+    const id = Number(idStr);
 
     if (isNaN(id)) {
       return NextResponse.json(
@@ -43,10 +44,11 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = Number(params.id);
+    const { id: idStr } = await props.params;
+    const id = Number(idStr);
     if (isNaN(id)) {
       return NextResponse.json(
         { message: "Invalid category ID format." },
@@ -82,10 +84,11 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = Number(params.id);
+    const { id: idStr } = await props.params;
+    const id = Number(idStr);
     if (isNaN(id)) {
       return NextResponse.json(
         { message: "Invalid category ID format." },
