@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { CategoryRepository } from "@/core/repositories/ICategoryRepository";
 import { CategoryUsecase } from "@/core/usecases/Category.usecase";
 import { CategoryDTO } from "@/core/dtos/Category.dto";
@@ -7,11 +7,11 @@ const categoryRepository = new CategoryRepository();
 const categoryUsecase = new CategoryUsecase(categoryRepository);
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const category = await categoryUsecase.findByIdCategoryUsecase(id);
 
     if (!category) {
@@ -34,11 +34,11 @@ export async function GET(
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const body: CategoryDTO = await request.json();
     const updatedCategory = await categoryUsecase.updateCategoryUsecase(
@@ -67,11 +67,11 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const success = await categoryUsecase.deleteCategoryUsecase(id);
 
     if (!success) {
