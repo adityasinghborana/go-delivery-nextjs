@@ -8,19 +8,10 @@ const categoryUsecase = new CategoryUsecase(categoryRepository);
 
 export async function GET(
   request: Request,
-  props: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id: idStr } = await props.params;
-    const id = Number(idStr);
-
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { message: "Invalid category ID format." },
-        { status: 400 }
-      );
-    }
-
+    const { id } = params;
     const category = await categoryUsecase.findByIdCategoryUsecase(id);
 
     if (!category) {
@@ -44,17 +35,10 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  props: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id: idStr } = await props.params;
-    const id = Number(idStr);
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { message: "Invalid category ID format." },
-        { status: 400 }
-      );
-    }
+    const { id } = params;
 
     const body: CategoryDTO = await request.json();
     const updatedCategory = await categoryUsecase.updateCategoryUsecase(
@@ -84,18 +68,10 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  props: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id: idStr } = await props.params;
-    const id = Number(idStr);
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { message: "Invalid category ID format." },
-        { status: 400 }
-      );
-    }
-
+    const { id } = params;
     const success = await categoryUsecase.deleteCategoryUsecase(id);
 
     if (!success) {

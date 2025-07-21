@@ -15,7 +15,7 @@ export class CategoryUsecase {
   }
 
   async updateCategoryUsecase(
-    id: number,
+    id: string,
     data: CategoryDTO
   ): Promise<CategoryEntity> {
     if (!data.name || data.name.trim() === "") {
@@ -30,11 +30,11 @@ export class CategoryUsecase {
     const categories = await this.categoryRepository.findAll();
     return categories;
   }
-  async findByIdCategoryUsecase(id: number): Promise<CategoryEntity | null> {
+  async findByIdCategoryUsecase(id: string): Promise<CategoryEntity | null> {
     const category = await this.categoryRepository.findById(id);
     return category;
   }
-  async deleteCategoryUsecase(id: number): Promise<boolean> {
+  async deleteCategoryUsecase(id: string): Promise<boolean> {
     await this.categoryRepository.delete(id);
     return true;
   }

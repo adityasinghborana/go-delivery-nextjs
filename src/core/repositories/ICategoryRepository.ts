@@ -4,17 +4,17 @@ import prisma from "@/lib/prisma";
 
 export interface ICategoryRepository {
   findAll(): Promise<CategoryEntity[]>;
-  findById(id: number): Promise<CategoryEntity | null>;
+  findById(id: string): Promise<CategoryEntity | null>;
   create(categoryData: CategoryDTO): Promise<CategoryEntity>;
-  update(id: number, categoryData: CategoryDTO): Promise<CategoryEntity>;
-  delete(id: number): Promise<void>;
+  update(id: string, categoryData: CategoryDTO): Promise<CategoryEntity>;
+  delete(id: string): Promise<void>;
 }
 export class CategoryRepository implements ICategoryRepository {
   async findAll(): Promise<CategoryEntity[]> {
     const categories = await prisma.category.findMany({});
     return categories;
   }
-  async findById(id: number): Promise<CategoryEntity | null> {
+  async findById(id: string): Promise<CategoryEntity | null> {
     const category = await prisma.category.findUnique({
       where: { id },
     });
@@ -31,7 +31,7 @@ export class CategoryRepository implements ICategoryRepository {
     });
     return newCategory;
   }
-  async update(id: number, categoryData: CategoryDTO): Promise<CategoryEntity> {
+  async update(id: string, categoryData: CategoryDTO): Promise<CategoryEntity> {
     const updateCategory = await prisma.category.update({
       where: { id },
       data: {
@@ -50,7 +50,7 @@ export class CategoryRepository implements ICategoryRepository {
     });
     return updateCategory;
   }
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     await prisma.category.delete({
       where: { id },
     });
