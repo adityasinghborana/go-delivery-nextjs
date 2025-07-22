@@ -26,3 +26,21 @@ model User {
     createdAt   DateTime @default(now())
     updatedAt   DateTime @default(now())
 }
+
+model Logo {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    logoUrl   String
+    logoAlt   String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+}
+
+model OnboardingScreen {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    screenOrder Int      @unique
+    title       String
+    description String
+    imageUrl    String
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @default(now())
+}
