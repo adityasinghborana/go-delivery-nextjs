@@ -35,7 +35,7 @@ export default function Signup() {
 
       // Get ID Token from Firebase
       const token = await userCredential.user.getIdToken();
-
+      console.log("COPY THIS TOKEN:", token);
       // Call backend API to store additional user data
       const res = await fetch("/api/user", {
         method: "POST",

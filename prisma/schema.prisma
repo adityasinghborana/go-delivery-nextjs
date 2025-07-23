@@ -18,13 +18,30 @@ model Category {
 }
 
 model User {
-    id          String   @id @default(auto()) @map("_id") @db.ObjectId
-    firebaseUid String   @unique
+    id          String    @id @default(auto()) @map("_id") @db.ObjectId
+    firebaseUid String    @unique
     name        String
-    email       String   @unique
+    email       String    @unique
     phone       String
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @default(now())
+    addresses   Address[]
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @default(now())
+}
+
+model Address {
+    id            String   @id @default(auto()) @map("_id") @db.ObjectId
+    type          String
+    fullAddress   String //this is google map address 
+    houseNumber   String
+    landMark      String?
+    postalCode    String
+    directionText String?
+    latitude      Float
+    longitude     Float
+    userId        String   @db.ObjectId
+    user          User     @relation(fields: [userId], references: [id])
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @default(now())
 }
 
 model Logo {
