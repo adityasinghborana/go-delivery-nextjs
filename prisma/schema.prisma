@@ -8,24 +8,28 @@ datasource db {
 }
 
 model Category {
-    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    id          String     @id @default(auto()) @map("_id") @db.ObjectId
     name        String
     description String
     imageUrl    String
     color       String
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @default(now())
+    services    Services[]
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @default(now())
 }
 
 model User {
-    id          String    @id @default(auto()) @map("_id") @db.ObjectId
-    firebaseUid String    @unique
-    name        String
-    email       String    @unique
-    phone       String
-    addresses   Address[]
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @default(now())
+    id           String     @id @default(auto()) @map("_id") @db.ObjectId
+    firebaseUid  String     @unique
+    name         String
+    email        String     @unique
+    phone        String
+    addresses    Address[]
+    order        Order[]
+    ownedService Services[] @relation(name: "serviceOwner")
+    createdAt    DateTime   @default(now())
+    updatedAt    DateTime   @default(now())
+    Review       Review[]
 }
 
 model Address {
@@ -60,4 +64,154 @@ model OnboardingScreen {
     imageUrl    String
     createdAt   DateTime @default(now())
     updatedAt   DateTime @default(now())
+}
+
+model Services {
+    id               String   @id @default(auto()) @map("_id") @db.ObjectId
+    name             String
+    mainImageUrl     String?
+    additionalImages Photo[]
+    address          String?
+    latitude         Float
+    longitude        Float
+    categoryId       String   @db.ObjectId
+    category         Category @relation(fields: [categoryId], references: [id])
+    //rating and review
+    rating           Float    @default(0.0)
+    ratingText       String?
+    totalRatings     Int      @default(0)
+    review           Review[]
+
+    cuisineType String[]
+
+    //delivery detail visible on card and detail
+    estimatedDeliveryTime String
+    deliveryFee           Float
+    minOrderValue         Float?
+
+    //Opearational hours
+    openingTime String?
+    closingTime String?
+
+    //delivery/pickup/Dine options
+    allowsDelivery Boolean @default(true)
+    allowsPickup   Boolean @default(false)
+    allowsDineIn   Boolean @default(false)
+
+    //promotional Banner
+    hasOffer         Boolean @default(false)
+    offerBannerText  String?
+    isVegetarianOnly Boolean @default(false)
+    isActive         Boolean @default(true)
+
+    //relationships to other key models
+    menus     Menu[]
+    orders    Order[] // Relation for orders fulfilled by this restaurant
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+    ownerId   String?  @db.ObjectId // Foreign key to the User who owns this restaurant
+    owner     User?    @relation(name: "serviceOwner", fields: [ownerId], references: [id])
+}
+
+model Menu {
+    id        String     @id @map("_id") @db.ObjectId
+    name      String
+    serviceId String     @db.ObjectId
+    service   Services   @relation(fields: [serviceId], references: [id])
+    menuItems MenuItem[]
+    itemCount Int        @default(0)
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @default(now())
+}
+
+model MenuItem {
+    id           String  @id @map("_id") @db.ObjectId
+    name         String
+    description  String?
+    price        Float
+    imageUrl     String?
+    isPopular    Boolean @default(false)
+    isVegetarian Boolean @default(false)
+    isAvailable  Boolean @default(true)
+
+    menuId String? @db.ObjectId
+    menu   Menu?   @relation(fields: [menuId], references: [id])
+
+    addonGroups AddonGroup[]
+
+    orderItems OrderItem[] // A MenuItem can be part of many OrderItems
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+}
+
+model AddonGroup {
+    id           String   @id @map("_id") @db.ObjectId
+    name         String
+    minSelection Int      @default(0)
+    maxSelection Int      @default(1)
+    menuItemId   String   @db.ObjectId
+    menuItem     MenuItem @relation(fields: [menuItemId], references: [id])
+    addons       Addon[]
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @default(now())
+}
+
+model Addon {
+    id           String     @id @map("_id") @db.ObjectId
+    name         String
+    price        Float      @default(0.0)
+    addonGroupId String     @db.ObjectId
+    addonGroup   AddonGroup @relation(fields: [addonGroupId], references: [id])
+    createdAt    DateTime   @default(now())
+    updatedAt    DateTime   @default(now())
+}
+
+model Review {
+    id        String   @id @map("_id") @db.ObjectId
+    userId    String   @db.ObjectId
+    user      User     @relation(fields: [userId], references: [id])
+    serviceId String   @db.ObjectId
+    service   Services @relation(fields: [serviceId], references: [id])
+    rating    Int
+    comment   String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+}
+
+model Photo {
+    id        String    @id @map("_id") @db.ObjectId
+    url       String
+    serviceId String?   @db.ObjectId
+    service   Services? @relation(fields: [serviceId], references: [id])
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @default(now())
+}
+
+model Order {
+    id              String      @id @map("_id") @db.ObjectId
+    userId          String      @db.ObjectId
+    user            User        @relation(fields: [userId], references: [id])
+    serviceId       String      @db.ObjectId
+    service         Services    @relation(fields: [serviceId], references: [id])
+    status          String
+    totalAmount     Float
+    deliveryAddress String
+    paymentMethod   String
+    items           OrderItem[]
+    createdAt       DateTime    @default(now())
+    updatedAt       DateTime    @default(now())
+}
+
+model OrderItem {
+    id             String   @id @map("_id") @db.ObjectId
+    orderId        String   @db.ObjectId
+    order          Order    @relation(fields: [orderId], references: [id])
+    menuItemId     String   @db.ObjectId
+    menuItem       MenuItem @relation(fields: [menuItemId], references: [id])
+    quantity       Int
+    price          Float
+    selectedAddons Json?
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @default(now())
 }
