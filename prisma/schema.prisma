@@ -105,70 +105,66 @@ model Services {
     isActive         Boolean @default(true)
 
     //relationships to other key models
-    menus     Menu[]
+    menus     RestaurentMenu[]
     orders    Order[] // Relation for orders fulfilled by this restaurant
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now())
-    ownerId   String?  @db.ObjectId // Foreign key to the User who owns this restaurant
-    owner     User?    @relation(name: "serviceOwner", fields: [ownerId], references: [id])
+    createdAt DateTime         @default(now())
+    updatedAt DateTime         @default(now())
+    ownerId   String?          @db.ObjectId // Foreign key to the User who owns this restaurant
+    owner     User?            @relation(name: "serviceOwner", fields: [ownerId], references: [id])
 }
 
-model Menu {
-    id        String     @id @map("_id") @db.ObjectId
+model RestaurentMenu {
+    id        String               @id @default(auto()) @map("_id") @db.ObjectId
     name      String
-    serviceId String     @db.ObjectId
-    service   Services   @relation(fields: [serviceId], references: [id])
-    menuItems MenuItem[]
-    itemCount Int        @default(0)
-    createdAt DateTime   @default(now())
-    updatedAt DateTime   @default(now())
+    serviceId String               @unique @db.ObjectId
+    service   Services             @relation(fields: [serviceId], references: [id])
+    menuItems RestaurentMenuItem[]
+    itemCount Int                  @default(0)
+    createdAt DateTime             @default(now())
+    updatedAt DateTime             @default(now())
 }
 
-model MenuItem {
-    id           String  @id @map("_id") @db.ObjectId
+model RestaurentMenuItem {
+    id           String          @id @default(auto()) @map("_id") @db.ObjectId
     name         String
     description  String?
     price        Float
     imageUrl     String?
-    isPopular    Boolean @default(false)
-    isVegetarian Boolean @default(false)
-    isAvailable  Boolean @default(true)
-
-    menuId String? @db.ObjectId
-    menu   Menu?   @relation(fields: [menuId], references: [id])
-
-    addonGroups AddonGroup[]
-
-    orderItems OrderItem[] // A MenuItem can be part of many OrderItems
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now())
+    isPopular    Boolean         @default(false)
+    isVegetarian Boolean         @default(false)
+    isAvailable  Boolean         @default(true)
+    menuId       String?         @db.ObjectId
+    menu         RestaurentMenu? @relation(fields: [menuId], references: [id])
+    addonGroups  AddonGroup[]
+    orderItems   OrderItem[] // A MenuItem can be part of many OrderItems
+    createdAt    DateTime        @default(now())
+    updatedAt    DateTime        @default(now())
 }
 
 model AddonGroup {
-    id           String   @id @map("_id") @db.ObjectId
+    id           String              @id @default(auto()) @map("_id") @db.ObjectId
     name         String
-    minSelection Int      @default(0)
-    maxSelection Int      @default(1)
-    menuItemId   String   @db.ObjectId
-    menuItem     MenuItem @relation(fields: [menuItemId], references: [id])
+    minSelection Int                 @default(0)
+    maxSelection Int                 @default(1)
+    menuItemId   String?             @db.ObjectId
+    menuItem     RestaurentMenuItem? @relation(fields: [menuItemId], references: [id])
     addons       Addon[]
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @default(now())
+    createdAt    DateTime            @default(now())
+    updatedAt    DateTime            @default(now())
 }
 
 model Addon {
-    id           String     @id @map("_id") @db.ObjectId
+    id           String      @id @default(auto()) @map("_id") @db.ObjectId
     name         String
-    price        Float      @default(0.0)
-    addonGroupId String     @db.ObjectId
-    addonGroup   AddonGroup @relation(fields: [addonGroupId], references: [id])
-    createdAt    DateTime   @default(now())
-    updatedAt    DateTime   @default(now())
+    price        Float       @default(0.0)
+    addonGroupId String?     @db.ObjectId
+    addonGroup   AddonGroup? @relation(fields: [addonGroupId], references: [id])
+    createdAt    DateTime    @default(now())
+    updatedAt    DateTime    @default(now())
 }
 
 model Review {
-    id        String   @id @map("_id") @db.ObjectId
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
     userId    String   @db.ObjectId
     user      User     @relation(fields: [userId], references: [id])
     serviceId String   @db.ObjectId
@@ -180,7 +176,7 @@ model Review {
 }
 
 model Photo {
-    id        String    @id @map("_id") @db.ObjectId
+    id        String    @id @default(auto()) @map("_id") @db.ObjectId
     url       String
     serviceId String?   @db.ObjectId
     service   Services? @relation(fields: [serviceId], references: [id])
@@ -189,7 +185,7 @@ model Photo {
 }
 
 model Order {
-    id              String      @id @map("_id") @db.ObjectId
+    id              String      @id @default(auto()) @map("_id") @db.ObjectId
     userId          String      @db.ObjectId
     user            User        @relation(fields: [userId], references: [id])
     serviceId       String      @db.ObjectId
@@ -204,14 +200,14 @@ model Order {
 }
 
 model OrderItem {
-    id             String   @id @map("_id") @db.ObjectId
-    orderId        String   @db.ObjectId
-    order          Order    @relation(fields: [orderId], references: [id])
-    menuItemId     String   @db.ObjectId
-    menuItem       MenuItem @relation(fields: [menuItemId], references: [id])
+    id             String             @id @default(auto()) @map("_id") @db.ObjectId
+    orderId        String             @db.ObjectId
+    order          Order              @relation(fields: [orderId], references: [id])
+    menuItemId     String             @db.ObjectId
+    menuItem       RestaurentMenuItem @relation(fields: [menuItemId], references: [id])
     quantity       Int
     price          Float
     selectedAddons Json?
-    createdAt      DateTime @default(now())
-    updatedAt      DateTime @default(now())
+    createdAt      DateTime           @default(now())
+    updatedAt      DateTime           @default(now())
 }

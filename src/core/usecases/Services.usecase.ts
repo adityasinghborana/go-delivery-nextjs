@@ -36,7 +36,7 @@ export class ServiceUsecase {
       throw new Error("Service no found");
     }
     if (existingService.ownerId !== userId) {
-      throw new Error("You are not authorized to update this service."); // Unauthorized error
+      throw new Error("You are not authorized to update this service.");
     }
     const updateService = await this.servicesRepository.updateService(
       serviceId,
