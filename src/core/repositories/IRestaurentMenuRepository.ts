@@ -76,7 +76,7 @@ export class RestaurentMenuRepository implements IRestaurentMenuRepository {
                 name: item.name,
                 minSelection: item.minSelection,
                 maxSelection: item.maxSelection,
-                addOns: {
+                addons: {
                   create: item.addons.map((item) => ({
                     name: item.name,
                     price: item.price,
