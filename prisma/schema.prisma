@@ -107,6 +107,7 @@ model Services {
     //relationships to other key models
     menus     RestaurentMenu?
     groceryMenu GroceryMenu?
+    pharmaceuticalMenu  PharmaceuticalMenu?
     orders    Order[] // Relation for orders fulfilled by this restaurant
     createdAt DateTime         @default(now())
     updatedAt DateTime         @default(now())
@@ -216,6 +217,52 @@ model   Weight{
     updatedAt    DateTime        @default(now()) 
 }
 
+
+
+
+model PharmaceuticalMenu{
+    id          String          @id @default(auto()) @map("_id") @db.ObjectId
+    name        String          
+    serviceId   String          @unique @db.ObjectId
+    service     Services        @relation(fields: [serviceId], references:[id])
+    submenuItems   PharmaceuticalSubMenu[]
+    itemCount   Int             @default(0)
+    createdAt   DateTime        @default(now())
+    updatedAt DateTime          @default(now())
+}
+model PharmaceuticalSubMenu{
+    id          String          @id @default(auto()) @map("_id") @db.ObjectId
+    name        String
+    menuItems   PharmaceuticalMenuItem[]
+    menuId      String?         @db.ObjectId
+    menu        PharmaceuticalMenu?     @relation(fields: [menuId],references:[id])
+    createdAt   DateTime             @default(now())
+    updatedAt   DateTime             @default(now())
+}
+model PharmaceuticalMenuItem{
+    id           String          @id @default(auto()) @map("_id") @db.ObjectId
+    name         String
+    weight       PharmaceuticalWeight[]
+    imageUrl     String?
+    additionalImages String[]
+    isPopular    Boolean            @default(false)
+    isVegetarian Boolean            @default(false)
+    isAvailable  Boolean            @default(true)
+    submenuId    String?            @db.ObjectId
+    submenu      PharmaceuticalSubMenu?    @relation(fields:[submenuId],references:[id])
+    createdAt    DateTime        @default(now())
+    updatedAt    DateTime        @default(now())   
+}
+model   PharmaceuticalWeight{
+    id           String              @id @default(auto()) @map("_id") @db.ObjectId
+    price        Float
+    sellPrice    Float
+    weight       Float
+    menuItemId   String?             @db.ObjectId
+    menuItem     PharmaceuticalMenuItem?    @relation(fields:[menuItemId],references:[id])
+    createdAt    DateTime        @default(now())
+    updatedAt    DateTime        @default(now()) 
+}
 
 
 model Review {
