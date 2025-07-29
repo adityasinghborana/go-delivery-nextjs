@@ -105,7 +105,8 @@ model Services {
     isActive         Boolean @default(true)
 
     //relationships to other key models
-    menus     RestaurentMenu[]
+    menus     RestaurentMenu?
+    groceryMenu GroceryMenu?
     orders    Order[] // Relation for orders fulfilled by this restaurant
     createdAt DateTime         @default(now())
     updatedAt DateTime         @default(now())
@@ -118,10 +119,19 @@ model RestaurentMenu {
     name      String
     serviceId String               @unique @db.ObjectId
     service   Services             @relation(fields: [serviceId], references: [id])
-    menuItems RestaurentMenuItem[]
+    submenuItems RestaurentSubMenu[]
     itemCount Int                  @default(0)
     createdAt DateTime             @default(now())
     updatedAt DateTime             @default(now())
+}
+model RestaurentSubMenu {
+    id          String               @id @default(auto()) @map("_id") @db.ObjectId
+    name        String
+    menuItems   RestaurentMenuItem[]
+    menuId       String?                @db.ObjectId
+    menu         RestaurentMenu?        @relation(fields: [menuId], references: [id])
+    createdAt   DateTime             @default(now())
+    updatedAt   DateTime             @default(now())
 }
 
 model RestaurentMenuItem {
@@ -130,11 +140,11 @@ model RestaurentMenuItem {
     description  String?
     price        Float
     imageUrl     String?
-    isPopular    Boolean         @default(false)
-    isVegetarian Boolean         @default(false)
-    isAvailable  Boolean         @default(true)
-    menuId       String?         @db.ObjectId
-    menu         RestaurentMenu? @relation(fields: [menuId], references: [id])
+    isPopular    Boolean            @default(false)
+    isVegetarian Boolean            @default(false)
+    isAvailable  Boolean            @default(true)
+    submenuId    String?            @db.ObjectId
+    submenu         RestaurentSubMenu? @relation(fields: [submenuId], references: [id])
     addonGroups  AddonGroup[]
     orderItems   OrderItem[] // A MenuItem can be part of many OrderItems
     createdAt    DateTime        @default(now())
@@ -162,6 +172,51 @@ model Addon {
     createdAt    DateTime    @default(now())
     updatedAt    DateTime    @default(now())
 }
+model GroceryMenu{
+    id          String          @id @default(auto()) @map("_id") @db.ObjectId
+    name        String          
+    serviceId   String          @unique @db.ObjectId
+    service     Services        @relation(fields: [serviceId], references:[id])
+    submenuItems   GrocerySubMenu[]
+    itemCount   Int             @default(0)
+    createdAt   DateTime        @default(now())
+    updatedAt DateTime          @default(now())
+}
+model GrocerySubMenu{
+    id          String          @id @default(auto()) @map("_id") @db.ObjectId
+    name        String
+    menuItems   GroceryMenuItem[]
+    menuId      String?         @db.ObjectId
+    menu        GroceryMenu?     @relation(fields: [menuId],references:[id])
+    createdAt   DateTime             @default(now())
+    updatedAt   DateTime             @default(now())
+}
+model GroceryMenuItem{
+    id           String          @id @default(auto()) @map("_id") @db.ObjectId
+    name         String
+    weight       Weight[]
+    imageUrl     String?
+    additionalImages String[]
+    isPopular    Boolean            @default(false)
+    isVegetarian Boolean            @default(false)
+    isAvailable  Boolean            @default(true)
+    submenuId    String?            @db.ObjectId
+    submenu      GrocerySubMenu?    @relation(fields:[submenuId],references:[id])
+    createdAt    DateTime        @default(now())
+    updatedAt    DateTime        @default(now())   
+}
+model   Weight{
+    id           String              @id @default(auto()) @map("_id") @db.ObjectId
+    price        Float
+    sellPrice    Float
+    weight       Float
+    menuItemId   String?             @db.ObjectId
+    menuItem     GroceryMenuItem?    @relation(fields:[menuItemId],references:[id])
+    createdAt    DateTime        @default(now())
+    updatedAt    DateTime        @default(now()) 
+}
+
+
 
 model Review {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId

@@ -1,10 +1,11 @@
 import { NextRequest,NextResponse } from "next/server";
 import { ServicesRepository } from "@/core/repositories/IServiceRepository";
-import { RestaurentMenuRepository } from "@/core/repositories/IRestaurentMenuRepository";
-import { RestaurentUsecase } from "@/core/usecases/RestaurentMenu.usecase";
+import { GroceryMenuRepository } from "@/core/repositories/IGroceryMenuRepository";
+import { GroceryUSecase } from "@/core/usecases/GroceryMenu.usecase";
+
 const serviceRepository = new ServicesRepository();
-const restaurentMenuRepository = new RestaurentMenuRepository();
-const restaurentusecase = new RestaurentUsecase(restaurentMenuRepository,serviceRepository);
+const groceryRepository = new GroceryMenuRepository();
+const groceryusecases = new GroceryUSecase(groceryRepository,serviceRepository);
 
 export async function GET(
     request:NextRequest,
@@ -12,13 +13,13 @@ export async function GET(
 ) {
     try {
         const {menuId} = await params;
-        const getMenu = await restaurentusecase.findRestaurentMenuByIdUsecase(menuId);
+        const getMenu = await groceryusecases.findByIdGroceryUsecase(menuId);
         return NextResponse.json(getMenu,{status:201});
     } catch (error: unknown) {
-    console.error("Error get service by id:", error);
+    console.error("Error get grocery by id:", error);
     return NextResponse.json(
       {
-        message: "Failed to get service.",
+        message: "Failed to get grocery.",
         error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
@@ -26,19 +27,17 @@ export async function GET(
   }
 }
 
-
 export async function DELETE(
     request: Request,
-      { params }: { params: Promise<{ menuId: string }> }
+    { params }: { params: Promise<{ menuId: string }> }
 ) {
     try {
-         const { menuId } = await params;
-
-        await restaurentusecase.deleteRestaurentMenu(menuId);
+        const { menuId } = await params;
+        await groceryusecases.DeleteGroceryUSecase(menuId);
         return new NextResponse(null, { status: 204 });
 
     } catch (error: unknown) {
-        console.error("Error deleting RestaurentMenu by id:", error);
+        console.error("Error deleting Grocery menu by id:", error);
         return NextResponse.json(
             {
                 message: "Failed to delete menu.",

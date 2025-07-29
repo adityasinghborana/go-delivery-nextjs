@@ -23,11 +23,15 @@ export class RestaurentMenuRepository implements IRestaurentMenuRepository {
     const Menu = await prisma.restaurentMenu.findFirst({
       where: { serviceId },
       include: {
-        menuItems: {
+        submenuItems: {
           include: {
-            addonGroups: {
+            menuItems: {
               include: {
-                addons: true,
+                addonGroups: {
+                  include: {
+                    addons: true,
+                  },
+                },
               },
             },
           },
@@ -40,11 +44,15 @@ export class RestaurentMenuRepository implements IRestaurentMenuRepository {
     const Menu = await prisma.restaurentMenu.findFirst({
       where: { id },
       include: {
-        menuItems: {
+        submenuItems: {
           include: {
-            addonGroups: {
+            menuItems: {
               include: {
-                addons: true,
+                addonGroups: {
+                  include: {
+                    addons: true,
+                  },
+                },
               },
             },
           },
@@ -62,24 +70,29 @@ export class RestaurentMenuRepository implements IRestaurentMenuRepository {
         name: data.name,
         serviceId: serviceId,
         itemCount: data.itemCount,
-        menuItems: {
-          create: data.menuItems.map((item) => ({
-            name: item.name,
-            description: item.description,
-            price: item.price,
-            imageUrl: item.imageUrl,
-            isPopular: item.isPopular,
-            isVegetarian: item.isVegetarian,
-            isAvailable: item.isAvalable,
-            addonGroups: {
-              create: item.addonGroups.map((item) => ({
-                name: item.name,
-                minSelection: item.minSelection,
-                maxSelection: item.maxSelection,
-                addons: {
-                  create: item.addons.map((item) => ({
-                    name: item.name,
-                    price: item.price,
+        submenuItems: {
+          create: data.submenuItems.map((submenu) => ({
+            name: submenu.name,
+            menuItems: {
+              create: submenu.menuItems.map((menuItem) => ({
+                name: menuItem.name,
+                description: menuItem.description,
+                price: menuItem.price,
+                imageUrl: menuItem.imageUrl,
+                isPopular: menuItem.isPopular,
+                isVegetarian: menuItem.isVegetarian,
+                isAvailable: menuItem.isAvalable,
+                addonGroups: {
+                  create: menuItem.addonGroups?.map((group) => ({
+                    name: group.name,
+                    minSelection: group.minSelection,
+                    maxSelection: group.maxSelection,
+                    addons: {
+                      create: group.addons?.map((addon) => ({
+                        name: addon.name,
+                        price: addon.price,
+                      })),
+                    },
                   })),
                 },
               })),
@@ -88,11 +101,15 @@ export class RestaurentMenuRepository implements IRestaurentMenuRepository {
         },
       },
       include: {
-        menuItems: {
+        submenuItems: {
           include: {
-            addonGroups: {
+            menuItems: {
               include: {
-                addons: true,
+                addonGroups: {
+                  include: {
+                    addons: true,
+                  },
+                },
               },
             },
           },
@@ -102,47 +119,94 @@ export class RestaurentMenuRepository implements IRestaurentMenuRepository {
     return createMenu as unknown as RestaurentMenuEntity;
   }
   async update(
-    data: RestaurentMenuDto,
+    data: Partial<RestaurentMenuDto>,
     serviceId: string
-  ): Promise<RestaurentMenuEntity> {
+): Promise<RestaurentMenuEntity> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dataToUpdate: any = { name: data.name };
+    if (data.submenuItems) {
+        dataToUpdate.itemCount = data.itemCount;
+        const submenusToUpdate = data.submenuItems.filter(submenu => submenu.id);
+        const submenusToCreate = data.submenuItems.filter(submenu => !submenu.id);
+
+        dataToUpdate.submenuItems = {
+            update: submenusToUpdate.map(submenu => ({
+                where: { id: submenu.id! },
+                data: {
+                    name: submenu.name,
+                    menuItems: {
+                        deleteMany: {},
+                        create: submenu.menuItems.map((menuItem) => ({
+                name: menuItem.name,
+                description: menuItem.description,
+                price: menuItem.price,
+                imageUrl: menuItem.imageUrl,
+                isPopular: menuItem.isPopular,
+                isVegetarian: menuItem.isVegetarian,
+                isAvailable: menuItem.isAvalable,
+                addonGroups: {
+                  create: menuItem.addonGroups?.map((group) => ({
+                    name: group.name,
+                    minSelection: group.minSelection,
+                    maxSelection: group.maxSelection,
+                    addons: {
+                      create: group.addons?.map((addon) => ({
+                        name: addon.name,
+                        price: addon.price,
+                      })),
+                    },
+                  })),
+                },
+              })),
+                    }
+                }
+            })),
+            
+            create: submenusToCreate.map(submenu => ({
+                name: submenu.name,
+                menuItems: {
+                    create: submenu.menuItems.map((menuItem) => ({
+                name: menuItem.name,
+                description: menuItem.description,
+                price: menuItem.price,
+                imageUrl: menuItem.imageUrl,
+                isPopular: menuItem.isPopular,
+                isVegetarian: menuItem.isVegetarian,
+                isAvailable: menuItem.isAvalable,
+                addonGroups: {
+                  create: menuItem.addonGroups?.map((group) => ({
+                    name: group.name,
+                    minSelection: group.minSelection,
+                    maxSelection: group.maxSelection,
+                    addons: {
+                      create: group.addons?.map((addon) => ({
+                        name: addon.name,
+                        price: addon.price,
+                      })),
+                    },
+                  })),
+                },
+              })),
+                }
+            }))
+        };
+    }
+
     const updatedMenu = await prisma.restaurentMenu.update({
       where: {
         serviceId: serviceId,
       },
-      data: {
-        name: data.name,
-        itemCount: data.itemCount,
-        menuItems: {
-          create: data.menuItems.map((menuItem) => ({
-            name: menuItem.name,
-            description: menuItem.description,
-            price: menuItem.price,
-            imageUrl: menuItem.imageUrl,
-            isPopular: menuItem.isPopular,
-            isVegetarian: menuItem.isVegetarian,
-            isAvailable: menuItem.isAvalable,
-            addonGroups: {
-              create: menuItem.addonGroups?.map((group) => ({
-                name: group.name,
-                minSelection: group.minSelection,
-                maxSelection: group.maxSelection,
-                addons: {
-                  create: group.addons?.map((addon) => ({
-                    name: addon.name,
-                    price: addon.price,
-                  })),
-                },
-              })),
-            },
-          })),
-        },
-      },
+      data: dataToUpdate,
       include: {
-        menuItems: {
+        submenuItems: {
           include: {
-            addonGroups: {
+            menuItems: {
               include: {
-                addons: true,
+                addonGroups: {
+                  include: {
+                    addons: true,
+                  },
+                },
               },
             },
           },
@@ -151,7 +215,7 @@ export class RestaurentMenuRepository implements IRestaurentMenuRepository {
     });
 
     return updatedMenu as unknown as RestaurentMenuEntity;
-  }
+}
   async delete(id: string): Promise<void> {
     await prisma.restaurentMenu.delete({
       where: { id },

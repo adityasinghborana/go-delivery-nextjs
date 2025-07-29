@@ -2,8 +2,16 @@ export interface RestaurentMenuEntity {
   id: string;
   name: string;
   serviceId: string;
-  menuItems: RestaurentMenuItemEntity[];
+  submenuItems: RestaurentSubMenuEntity[];
   itemCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+export interface RestaurentSubMenuEntity{
+  id:string;
+  name:string;
+  menuId?:string;
+  menuItems:RestaurentMenuItemEntity[];
   createdAt: Date;
   updatedAt: Date;
 }

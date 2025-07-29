@@ -1,10 +1,17 @@
 export interface RestaurentMenuDto {
   name: string;
   serviceId: string;
-  menuItems: RestaurentMenuItemDto[];
+  submenuItems: RestaurentSubMenuDto[];
   itemCount: number;
 }
+export interface RestaurentSubMenuDto{
+  id?:string;
+  name:string;
+  menuId?:string;
+  menuItems:RestaurentMenuItemDto[];
+}
 export interface RestaurentMenuItemDto {
+  id?:string;
   name: string;
   description: string;
   price: number;
@@ -16,6 +23,7 @@ export interface RestaurentMenuItemDto {
   addonGroups: AddOnGroupDto[];
 }
 export interface AddOnGroupDto {
+  id?:string;
   name: string;
   minSelection: number;
   maxSelection: number;
@@ -23,6 +31,7 @@ export interface AddOnGroupDto {
   addons: AddonDto[];
 }
 export interface AddonDto {
+  id?:string;
   name: string;
   price: number;
   addOnGroupId?: string;
