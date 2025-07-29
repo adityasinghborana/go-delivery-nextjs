@@ -1,6 +1,5 @@
 import { NextRequest,NextResponse } from "next/server";
 import { ServicesRepository } from "@/core/repositories/IServiceRepository";
-import { PharmaceuticalMenuDto } from "@/core/dtos/PharmaceuticalMenu.dto";
 import { PharmaceuticalMenuRepository } from "@/core/repositories/IPharmaMenuRepository";
 import { Pharmaceuticalusecase } from "@/core/usecases/Pharmaceutical.usecase";
 const serviceRepository = new ServicesRepository();

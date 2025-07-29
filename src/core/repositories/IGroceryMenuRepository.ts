@@ -61,6 +61,7 @@ export class GroceryMenuRepository implements IGroceryMenuRepository{
         return createMenu as unknown as GroceryMenuEntity;
     }
     async update(data:Partial<GroceryMenuDto>, serviceId: string): Promise<GroceryMenuEntity> {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const dataToUpdate:any = {name:data.name}
         if(data.submenuItems){
             dataToUpdate.itemCount = data.itemCount;

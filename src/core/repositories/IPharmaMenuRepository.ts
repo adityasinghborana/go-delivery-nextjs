@@ -61,6 +61,7 @@ export class PharmaceuticalMenuRepository implements IPharmaceuticalMenuReposito
         return createMenu as unknown as PharmaceuticalMenuEntity;
     }
     async update(data:Partial<PharmaceuticalMenuDto>, serviceId: string): Promise<PharmaceuticalMenuEntity> {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const dataToUpdate:any = {name:data.name}
         if(data.submenuItems){
             dataToUpdate.itemCount = data.itemCount;
