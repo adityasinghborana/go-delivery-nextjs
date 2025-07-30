@@ -14,6 +14,7 @@ model Category {
     imageUrl    String
     color       String
     services    Services[]
+    packages    Package[]
     createdAt   DateTime   @default(now())
     updatedAt   DateTime   @default(now())
 }
@@ -27,6 +28,7 @@ model User {
     addresses    Address[]
     order        Order[]
     ownedService Services[] @relation(name: "serviceOwner")
+    sentPackages Package[]  @relation(name:"SentByUser")
     createdAt    DateTime   @default(now())
     updatedAt    DateTime   @default(now())
     Review       Review[]
@@ -217,9 +219,6 @@ model   Weight{
     updatedAt    DateTime        @default(now()) 
 }
 
-
-
-
 model PharmaceuticalMenu{
     id          String          @id @default(auto()) @map("_id") @db.ObjectId
     name        String          
@@ -312,4 +311,92 @@ model OrderItem {
     selectedAddons Json?
     createdAt      DateTime           @default(now())
     updatedAt      DateTime           @default(now())
+}
+enum PackageStatus {
+  PENDING      // User has submitted the request, waiting for payment/confirmation
+  CONFIRMED    // Payment successful, waiting for a rider
+  ASSIGNED     // Rider has been assigned
+  PICKED_UP    // Rider has collected the package
+  IN_TRANSIT   // Package is on its way to the receiver
+  DELIVERED    // Package has been successfully delivered
+  CANCELLED    // The delivery was cancelled
+}
+model Package{
+    id             String             @id @default(auto()) @map("_id") @db.ObjectId
+    trackingId     String             @unique
+    senderId       String             @db.ObjectId
+    sender         User               @relation("SentByUser",fields:[senderId],references:[id])
+    categoryId     String             @db.ObjectId
+    category        Category          @relation(fields:[categoryId],references:[id]) 
+    weight         Float
+    packageTime    DateTime
+    parcelWorth    String
+    Fragile        String
+    parcelType     String     //food or liguid
+    itemCount      Int          @default(0)
+    notesForRider  String
+
+    //link to the rider who is delivering  the package
+    riderId         String?     @db.ObjectId
+    rider           Rider?      @relation("AssignedToRider",fields:[riderId],references:[id])
+
+    //sender Detail
+    senderFullAdd   String
+    senderHouseNo   String
+    senderaddressLine  String
+    senderPostalCode    String
+    senderCity          String
+    senderLandmark      String?
+    senderPhone         String
+    senderName          String
+    senderLatitude      Float
+    senderLongitude     Float
+
+    //Receiver Detail
+    receiverFullAdd   String
+    receiverHouseNo   String
+    receiveraddressLine  String
+    receiverPostalCode    String
+    receiverCity          String
+    receiverLandmark      String?
+    receiverPhone         String
+    receiverName          String
+    receiverLatitude      Float
+    receiverLongitude     Float
+
+    //status
+    status          PackageStatus   @default(PENDING)
+
+     // Pricing & Payment
+    baseFare       Float         @default(0)
+    distanceCharge Float         @default(0)
+    weightCharge   Float         @default(0)
+    totalFare      Float         // The final calculated price
+    paymentId      String?       // ID from your payment gateway (e.g., Stripe, Razorpay)
+    createdAt      DateTime           @default(now())
+    updatedAt      DateTime           @default(now())
+    deliveredAt    DateTime?
+
+    //item detail weight and size
+    PackageName       String       
+    Packagewidth          Float
+    Packageheight         Float
+    Packagedepth          Float
+
+    //parcel service
+    serviceName    String
+    servicePrice   Int
+    imageUrl       String?
+}
+
+
+
+model Rider {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  phone           String    @unique
+  vehicleDetails  String? // e.g., "Honda Activa - MP09 AB 1234"
+  // A rider can deliver many packages
+  assignedPackages Package[] @relation("AssignedToRider")
+  createdAt       DateTime  @default(now())
 }
