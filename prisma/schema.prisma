@@ -20,19 +20,20 @@ model Category {
 }
 
 model User {
-    id           String     @id @default(auto()) @map("_id") @db.ObjectId
-    firebaseUid  String     @unique
+    id           String         @id @default(auto()) @map("_id") @db.ObjectId
+    firebaseUid  String         @unique
     name         String
-    email        String     @unique
+    email        String         @unique
     phone        String
     addresses    Address[]
     order        Order[]
-    ownedService Services[] @relation(name: "serviceOwner")
-    sentPackages Package[]  @relation(name: "SentByUser")
-    createdAt    DateTime   @default(now())
-    updatedAt    DateTime   @default(now())
+    ownedService Services[]     @relation(name: "serviceOwner")
+    sentPackages Package[]      @relation(name: "SentByUser")
+    createdAt    DateTime       @default(now())
+    updatedAt    DateTime       @default(now())
     Review       Review[]
     carts        Cart[]
+    wishList     WishListItem[]
 }
 
 model Address {
@@ -70,20 +71,21 @@ model OnboardingScreen {
 }
 
 model Services {
-    id               String   @id @default(auto()) @map("_id") @db.ObjectId
+    id               String         @id @default(auto()) @map("_id") @db.ObjectId
     name             String
     mainImageUrl     String?
     additionalImages Photo[]
     address          String?
     latitude         Float
     longitude        Float
-    categoryId       String   @db.ObjectId
-    category         Category @relation(fields: [categoryId], references: [id])
+    categoryId       String         @db.ObjectId
+    category         Category       @relation(fields: [categoryId], references: [id])
     //rating and review
-    rating           Float    @default(0.0)
+    rating           Float          @default(0.0)
     ratingText       String?
-    totalRatings     Int      @default(0)
+    totalRatings     Int            @default(0)
     review           Review[]
+    wishlistedBy     WishListItem[] //on service can be inside the  many user 
 
     cuisineType String[]
 
@@ -433,4 +435,16 @@ model CartItem {
     cart       Cart     @relation(fields: [cartId], references: [id])
     createdAt  DateTime @default(now())
     updatedAt  DateTime @default(now())
+}
+
+model WishListItem {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    userId    String   @db.ObjectId
+    serviceId String   @db.ObjectId
+    user      User     @relation(fields: [userId], references: [id])
+    service   Services @relation(fields: [serviceId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+
+    @@unique([userId, serviceId])
 }
