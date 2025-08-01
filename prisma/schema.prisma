@@ -28,10 +28,11 @@ model User {
     addresses    Address[]
     order        Order[]
     ownedService Services[] @relation(name: "serviceOwner")
-    sentPackages Package[]  @relation(name:"SentByUser")
+    sentPackages Package[]  @relation(name: "SentByUser")
     createdAt    DateTime   @default(now())
     updatedAt    DateTime   @default(now())
     Review       Review[]
+    carts        Cart[]
 }
 
 model Address {
@@ -107,38 +108,40 @@ model Services {
     isActive         Boolean @default(true)
 
     //relationships to other key models
-    menus     RestaurentMenu?
-    groceryMenu GroceryMenu?
-    pharmaceuticalMenu  PharmaceuticalMenu?
-    orders    Order[] // Relation for orders fulfilled by this restaurant
-    createdAt DateTime         @default(now())
-    updatedAt DateTime         @default(now())
-    ownerId   String?          @db.ObjectId // Foreign key to the User who owns this restaurant
-    owner     User?            @relation(name: "serviceOwner", fields: [ownerId], references: [id])
+    menus              RestaurentMenu?
+    groceryMenu        GroceryMenu?
+    pharmaceuticalMenu PharmaceuticalMenu?
+    orders             Order[] // Relation for orders fulfilled by this restaurant
+    carts              Cart[]
+    createdAt          DateTime            @default(now())
+    updatedAt          DateTime            @default(now())
+    ownerId            String?             @db.ObjectId // Foreign key to the User who owns this restaurant
+    owner              User?               @relation(name: "serviceOwner", fields: [ownerId], references: [id])
 }
 
 model RestaurentMenu {
+    id           String              @id @default(auto()) @map("_id") @db.ObjectId
+    name         String
+    serviceId    String              @unique @db.ObjectId
+    service      Services            @relation(fields: [serviceId], references: [id])
+    submenuItems RestaurentSubMenu[]
+    itemCount    Int                 @default(0)
+    createdAt    DateTime            @default(now())
+    updatedAt    DateTime            @default(now())
+}
+
+model RestaurentSubMenu {
     id        String               @id @default(auto()) @map("_id") @db.ObjectId
     name      String
-    serviceId String               @unique @db.ObjectId
-    service   Services             @relation(fields: [serviceId], references: [id])
-    submenuItems RestaurentSubMenu[]
-    itemCount Int                  @default(0)
+    menuItems RestaurentMenuItem[]
+    menuId    String?              @db.ObjectId
+    menu      RestaurentMenu?      @relation(fields: [menuId], references: [id])
     createdAt DateTime             @default(now())
     updatedAt DateTime             @default(now())
 }
-model RestaurentSubMenu {
-    id          String               @id @default(auto()) @map("_id") @db.ObjectId
-    name        String
-    menuItems   RestaurentMenuItem[]
-    menuId       String?                @db.ObjectId
-    menu         RestaurentMenu?        @relation(fields: [menuId], references: [id])
-    createdAt   DateTime             @default(now())
-    updatedAt   DateTime             @default(now())
-}
 
 model RestaurentMenuItem {
-    id           String          @id @default(auto()) @map("_id") @db.ObjectId
+    id           String             @id @default(auto()) @map("_id") @db.ObjectId
     name         String
     description  String?
     price        Float
@@ -147,11 +150,11 @@ model RestaurentMenuItem {
     isVegetarian Boolean            @default(false)
     isAvailable  Boolean            @default(true)
     submenuId    String?            @db.ObjectId
-    submenu         RestaurentSubMenu? @relation(fields: [submenuId], references: [id])
+    submenu      RestaurentSubMenu? @relation(fields: [submenuId], references: [id])
     addonGroups  AddonGroup[]
     orderItems   OrderItem[] // A MenuItem can be part of many OrderItems
-    createdAt    DateTime        @default(now())
-    updatedAt    DateTime        @default(now())
+    createdAt    DateTime           @default(now())
+    updatedAt    DateTime           @default(now())
 }
 
 model AddonGroup {
@@ -175,94 +178,100 @@ model Addon {
     createdAt    DateTime    @default(now())
     updatedAt    DateTime    @default(now())
 }
-model GroceryMenu{
-    id          String          @id @default(auto()) @map("_id") @db.ObjectId
-    name        String          
-    serviceId   String          @unique @db.ObjectId
-    service     Services        @relation(fields: [serviceId], references:[id])
-    submenuItems   GrocerySubMenu[]
-    itemCount   Int             @default(0)
-    createdAt   DateTime        @default(now())
-    updatedAt DateTime          @default(now())
-}
-model GrocerySubMenu{
-    id          String          @id @default(auto()) @map("_id") @db.ObjectId
-    name        String
-    menuItems   GroceryMenuItem[]
-    menuId      String?         @db.ObjectId
-    menu        GroceryMenu?     @relation(fields: [menuId],references:[id])
-    createdAt   DateTime             @default(now())
-    updatedAt   DateTime             @default(now())
-}
-model GroceryMenuItem{
-    id           String          @id @default(auto()) @map("_id") @db.ObjectId
+
+model GroceryMenu {
+    id           String           @id @default(auto()) @map("_id") @db.ObjectId
     name         String
-    weight       Weight[]
-    imageUrl     String?
-    additionalImages String[]
-    isPopular    Boolean            @default(false)
-    isVegetarian Boolean            @default(false)
-    isAvailable  Boolean            @default(true)
-    submenuId    String?            @db.ObjectId
-    submenu      GrocerySubMenu?    @relation(fields:[submenuId],references:[id])
-    createdAt    DateTime        @default(now())
-    updatedAt    DateTime        @default(now())   
-}
-model   Weight{
-    id           String              @id @default(auto()) @map("_id") @db.ObjectId
-    price        Float
-    sellPrice    Float
-    weight       Float
-    menuItemId   String?             @db.ObjectId
-    menuItem     GroceryMenuItem?    @relation(fields:[menuItemId],references:[id])
-    createdAt    DateTime        @default(now())
-    updatedAt    DateTime        @default(now()) 
+    serviceId    String           @unique @db.ObjectId
+    service      Services         @relation(fields: [serviceId], references: [id])
+    submenuItems GrocerySubMenu[]
+    itemCount    Int              @default(0)
+    createdAt    DateTime         @default(now())
+    updatedAt    DateTime         @default(now())
 }
 
-model PharmaceuticalMenu{
-    id          String          @id @default(auto()) @map("_id") @db.ObjectId
-    name        String          
-    serviceId   String          @unique @db.ObjectId
-    service     Services        @relation(fields: [serviceId], references:[id])
-    submenuItems   PharmaceuticalSubMenu[]
-    itemCount   Int             @default(0)
-    createdAt   DateTime        @default(now())
+model GrocerySubMenu {
+    id        String            @id @default(auto()) @map("_id") @db.ObjectId
+    name      String
+    menuItems GroceryMenuItem[]
+    menuId    String?           @db.ObjectId
+    menu      GroceryMenu?      @relation(fields: [menuId], references: [id])
+    createdAt DateTime          @default(now())
     updatedAt DateTime          @default(now())
 }
-model PharmaceuticalSubMenu{
-    id          String          @id @default(auto()) @map("_id") @db.ObjectId
-    name        String
-    menuItems   PharmaceuticalMenuItem[]
-    menuId      String?         @db.ObjectId
-    menu        PharmaceuticalMenu?     @relation(fields: [menuId],references:[id])
-    createdAt   DateTime             @default(now())
-    updatedAt   DateTime             @default(now())
-}
-model PharmaceuticalMenuItem{
-    id           String          @id @default(auto()) @map("_id") @db.ObjectId
-    name         String
-    weight       PharmaceuticalWeight[]
-    imageUrl     String?
+
+model GroceryMenuItem {
+    id               String          @id @default(auto()) @map("_id") @db.ObjectId
+    name             String
+    weight           Weight[]
+    imageUrl         String?
     additionalImages String[]
-    isPopular    Boolean            @default(false)
-    isVegetarian Boolean            @default(false)
-    isAvailable  Boolean            @default(true)
-    submenuId    String?            @db.ObjectId
-    submenu      PharmaceuticalSubMenu?    @relation(fields:[submenuId],references:[id])
-    createdAt    DateTime        @default(now())
-    updatedAt    DateTime        @default(now())   
-}
-model   PharmaceuticalWeight{
-    id           String              @id @default(auto()) @map("_id") @db.ObjectId
-    price        Float
-    sellPrice    Float
-    weight       Float
-    menuItemId   String?             @db.ObjectId
-    menuItem     PharmaceuticalMenuItem?    @relation(fields:[menuItemId],references:[id])
-    createdAt    DateTime        @default(now())
-    updatedAt    DateTime        @default(now()) 
+    isPopular        Boolean         @default(false)
+    isVegetarian     Boolean         @default(false)
+    isAvailable      Boolean         @default(true)
+    submenuId        String?         @db.ObjectId
+    submenu          GrocerySubMenu? @relation(fields: [submenuId], references: [id])
+    createdAt        DateTime        @default(now())
+    updatedAt        DateTime        @default(now())
 }
 
+model Weight {
+    id         String           @id @default(auto()) @map("_id") @db.ObjectId
+    price      Float
+    sellPrice  Float
+    weight     Float
+    menuItemId String?          @db.ObjectId
+    menuItem   GroceryMenuItem? @relation(fields: [menuItemId], references: [id])
+    createdAt  DateTime         @default(now())
+    updatedAt  DateTime         @default(now())
+}
+
+model PharmaceuticalMenu {
+    id           String                  @id @default(auto()) @map("_id") @db.ObjectId
+    name         String
+    serviceId    String                  @unique @db.ObjectId
+    service      Services                @relation(fields: [serviceId], references: [id])
+    submenuItems PharmaceuticalSubMenu[]
+    itemCount    Int                     @default(0)
+    createdAt    DateTime                @default(now())
+    updatedAt    DateTime                @default(now())
+}
+
+model PharmaceuticalSubMenu {
+    id        String                   @id @default(auto()) @map("_id") @db.ObjectId
+    name      String
+    menuItems PharmaceuticalMenuItem[]
+    menuId    String?                  @db.ObjectId
+    menu      PharmaceuticalMenu?      @relation(fields: [menuId], references: [id])
+    createdAt DateTime                 @default(now())
+    updatedAt DateTime                 @default(now())
+}
+
+model PharmaceuticalMenuItem {
+    id               String                 @id @default(auto()) @map("_id") @db.ObjectId
+    name             String
+    weight           PharmaceuticalWeight[]
+    imageUrl         String?
+    additionalImages String[]
+    isPopular        Boolean                @default(false)
+    isVegetarian     Boolean                @default(false)
+    isAvailable      Boolean                @default(true)
+    submenuId        String?                @db.ObjectId
+    submenu          PharmaceuticalSubMenu? @relation(fields: [submenuId], references: [id])
+    createdAt        DateTime               @default(now())
+    updatedAt        DateTime               @default(now())
+}
+
+model PharmaceuticalWeight {
+    id         String                  @id @default(auto()) @map("_id") @db.ObjectId
+    price      Float
+    sellPrice  Float
+    weight     Float
+    menuItemId String?                 @db.ObjectId
+    menuItem   PharmaceuticalMenuItem? @relation(fields: [menuItemId], references: [id])
+    createdAt  DateTime                @default(now())
+    updatedAt  DateTime                @default(now())
+}
 
 model Review {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -312,91 +321,116 @@ model OrderItem {
     createdAt      DateTime           @default(now())
     updatedAt      DateTime           @default(now())
 }
+
 enum PackageStatus {
-  PENDING      // User has submitted the request, waiting for payment/confirmation
-  CONFIRMED    // Payment successful, waiting for a rider
-  ASSIGNED     // Rider has been assigned
-  PICKED_UP    // Rider has collected the package
-  IN_TRANSIT   // Package is on its way to the receiver
-  DELIVERED    // Package has been successfully delivered
-  CANCELLED    // The delivery was cancelled
+    PENDING // User has submitted the request, waiting for payment/confirmation
+    CONFIRMED // Payment successful, waiting for a rider
+    ASSIGNED // Rider has been assigned
+    PICKED_UP // Rider has collected the package
+    IN_TRANSIT // Package is on its way to the receiver
+    DELIVERED // Package has been successfully delivered
+    CANCELLED // The delivery was cancelled
 }
-model Package{
-    id             String             @id @default(auto()) @map("_id") @db.ObjectId
-    trackingId     String             @unique
-    senderId       String             @db.ObjectId
-    sender         User               @relation("SentByUser",fields:[senderId],references:[id])
-    categoryId     String             @db.ObjectId
-    category        Category          @relation(fields:[categoryId],references:[id]) 
-    weight         Float
-    packageTime    DateTime
-    parcelWorth    String
-    Fragile        String
-    parcelType     String     //food or liguid
-    itemCount      Int          @default(0)
-    notesForRider  String
+
+model Package {
+    id            String   @id @default(auto()) @map("_id") @db.ObjectId
+    trackingId    String   @unique
+    senderId      String   @db.ObjectId
+    sender        User     @relation("SentByUser", fields: [senderId], references: [id])
+    categoryId    String   @db.ObjectId
+    category      Category @relation(fields: [categoryId], references: [id])
+    weight        Float
+    packageTime   DateTime
+    parcelWorth   String
+    Fragile       String
+    parcelType    String //food or liguid
+    itemCount     Int      @default(0)
+    notesForRider String
 
     //link to the rider who is delivering  the package
-    riderId         String?     @db.ObjectId
-    rider           Rider?      @relation("AssignedToRider",fields:[riderId],references:[id])
+    riderId String? @db.ObjectId
+    rider   Rider?  @relation("AssignedToRider", fields: [riderId], references: [id])
 
     //sender Detail
-    senderFullAdd   String
-    senderHouseNo   String
-    senderaddressLine  String
-    senderPostalCode    String
-    senderCity          String
-    senderLandmark      String?
-    senderPhone         String
-    senderName          String
-    senderLatitude      Float
-    senderLongitude     Float
+    senderFullAdd     String
+    senderHouseNo     String
+    senderaddressLine String
+    senderPostalCode  String
+    senderCity        String
+    senderLandmark    String?
+    senderPhone       String
+    senderName        String
+    senderLatitude    Float
+    senderLongitude   Float
 
     //Receiver Detail
-    receiverFullAdd   String
-    receiverHouseNo   String
-    receiveraddressLine  String
-    receiverPostalCode    String
-    receiverCity          String
-    receiverLandmark      String?
-    receiverPhone         String
-    receiverName          String
-    receiverLatitude      Float
-    receiverLongitude     Float
+    receiverFullAdd     String
+    receiverHouseNo     String
+    receiveraddressLine String
+    receiverPostalCode  String
+    receiverCity        String
+    receiverLandmark    String?
+    receiverPhone       String
+    receiverName        String
+    receiverLatitude    Float
+    receiverLongitude   Float
 
     //status
-    status          PackageStatus   @default(PENDING)
+    status PackageStatus @default(PENDING)
 
-     // Pricing & Payment
-    baseFare       Float         @default(0)
-    distanceCharge Float         @default(0)
-    weightCharge   Float         @default(0)
-    totalFare      Float         // The final calculated price
-    paymentId      String?       // ID from your payment gateway (e.g., Stripe, Razorpay)
-    createdAt      DateTime           @default(now())
-    updatedAt      DateTime           @default(now())
+    // Pricing & Payment
+    baseFare       Float     @default(0)
+    distanceCharge Float     @default(0)
+    weightCharge   Float     @default(0)
+    totalFare      Float // The final calculated price
+    paymentId      String? // ID from your payment gateway (e.g., Stripe, Razorpay)
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime  @default(now())
     deliveredAt    DateTime?
 
     //item detail weight and size
-    PackageName       String       
-    Packagewidth          Float
-    Packageheight         Float
-    Packagedepth          Float
+    PackageName   String
+    Packagewidth  Float
+    Packageheight Float
+    Packagedepth  Float
 
     //parcel service
-    serviceName    String
-    servicePrice   Int
-    imageUrl       String?
+    serviceName  String
+    servicePrice Int
+    imageUrl     String?
 }
 
-
-
 model Rider {
-  id              String    @id @default(auto()) @map("_id") @db.ObjectId
-  name            String
-  phone           String    @unique
-  vehicleDetails  String? // e.g., "Honda Activa - MP09 AB 1234"
-  // A rider can deliver many packages
-  assignedPackages Package[] @relation("AssignedToRider")
-  createdAt       DateTime  @default(now())
+    id               String    @id @default(auto()) @map("_id") @db.ObjectId
+    name             String
+    phone            String    @unique
+    vehicleDetails   String? // e.g., "Honda Activa - MP09 AB 1234"
+    // A rider can deliver many packages
+    assignedPackages Package[] @relation("AssignedToRider")
+    createdAt        DateTime  @default(now())
+}
+
+model Cart {
+    id         String     @id @default(auto()) @map("_id") @db.ObjectId
+    userId     String     @db.ObjectId
+    serviceId  String     @db.ObjectId
+    user       User       @relation(fields: [userId], references: [id])
+    service    Services   @relation(fields: [serviceId], references: [id])
+    items      CartItem[]
+    TotalPrice Int
+    createdAt  DateTime   @default(now())
+    updatedAt  DateTime   @default(now())
+}
+
+model CartItem {
+    id         String   @id @default(auto()) @map("_id") @db.ObjectId
+    cartId     String   @db.ObjectId
+    itemId     String   @db.ObjectId
+    price      Int
+    quantity   Int
+    addOnName  String? //eg:extra cheese,etc
+    addOnPrice Int?
+    cart       Cart     @relation(fields: [cartId], references: [id])
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @default(now())
 }
