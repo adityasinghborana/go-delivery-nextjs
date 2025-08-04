@@ -25,6 +25,9 @@ model User {
     name         String
     email        String         @unique
     phone        String
+    firstName    String?
+    lastName     String?
+    Dob          DateTime?
     addresses    Address[]
     order        Order[]
     ownedService Services[]     @relation(name: "serviceOwner")
@@ -34,6 +37,16 @@ model User {
     Review       Review[]
     carts        Cart[]
     wishList     WishListItem[]
+}
+
+model SuperAdminUser {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    firebaseUid String   @unique
+    name        String
+    email       String
+    phone       String
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @default(now())
 }
 
 model Address {
@@ -104,10 +117,12 @@ model Services {
     allowsDineIn   Boolean @default(false)
 
     //promotional Banner
-    hasOffer         Boolean @default(false)
-    offerBannerText  String?
-    isVegetarianOnly Boolean @default(false)
-    isActive         Boolean @default(true)
+    hasOffer           Boolean @default(false)
+    offerBannerText    String?
+    isVegetarianOnly   Boolean @default(false)
+    isActive           Boolean @default(false)
+    verificationStatus String?
+    rejectionReason    String?
 
     //relationships to other key models
     menus              RestaurentMenu?
@@ -403,13 +418,16 @@ model Package {
 }
 
 model Rider {
-    id               String    @id @default(auto()) @map("_id") @db.ObjectId
-    name             String
-    phone            String    @unique
-    vehicleDetails   String? // e.g., "Honda Activa - MP09 AB 1234"
+    id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+    name               String
+    phone              String    @unique
+    vehicleDetails     String? // e.g., "Honda Activa - MP09 AB 1234"
     // A rider can deliver many packages
-    assignedPackages Package[] @relation("AssignedToRider")
-    createdAt        DateTime  @default(now())
+    assignedPackages   Package[] @relation("AssignedToRider")
+    verificationStatus String
+    rejectionReason    String?
+
+    createdAt DateTime @default(now())
 }
 
 model Cart {

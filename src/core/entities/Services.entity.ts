@@ -29,6 +29,8 @@ export interface servicesEntity {
   offerBannerText: string;
   isVegetarianOnly: boolean;
   isActive: boolean;
+  verificationStatus: string;
+  rejectionReason?: string;
   createdAt: Date;
   updatedAt: Date;
   ownerId: string;

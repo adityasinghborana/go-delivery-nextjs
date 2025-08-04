@@ -26,6 +26,9 @@ export interface IServiceRepository {
 export class ServicesRepository implements IServiceRepository {
   async findAllServices(): Promise<servicesEntity[]> {
     const services = await prisma.services.findMany({
+      where: {
+        isActive: true,
+      },
       include: {
         additionalImages: true,
       },
