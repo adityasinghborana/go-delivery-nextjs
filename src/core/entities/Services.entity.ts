@@ -17,6 +17,7 @@ export interface servicesEntity {
   ratingText: string;
   totalRatings: number;
   cuisineType: string[];
+  verificationDocument: verifactionDocumentEntity;
   estimatedDeliveryTime: string;
   deliveryFee: number;
   minOrderValue: number;
@@ -34,4 +35,17 @@ export interface servicesEntity {
   createdAt: Date;
   updatedAt: Date;
   ownerId: string;
+}
+export interface verifactionDocumentEntity {
+  id: string;
+  serviceId: string;
+  serviceLicenceNumber: string;
+  panCard: string;
+  GSTINCertificate?: string;
+  AccountHolderName: string;
+  AccountNumber: string;
+  IFSCCode: string;
+  ProofOfOwnerShip?: string;
+  OwnerGovernmentIssueId: string;
+  OwnerImage: string;
 }

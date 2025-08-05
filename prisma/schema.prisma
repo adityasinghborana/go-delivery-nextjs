@@ -93,6 +93,7 @@ model Services {
     longitude        Float
     categoryId       String         @db.ObjectId
     category         Category       @relation(fields: [categoryId], references: [id])
+    categoryName     String?        @unique
     //rating and review
     rating           Float          @default(0.0)
     ratingText       String?
@@ -117,12 +118,13 @@ model Services {
     allowsDineIn   Boolean @default(false)
 
     //promotional Banner
-    hasOffer           Boolean @default(false)
-    offerBannerText    String?
-    isVegetarianOnly   Boolean @default(false)
-    isActive           Boolean @default(false)
-    verificationStatus String?
-    rejectionReason    String?
+    hasOffer             Boolean   @default(false)
+    offerBannerText      String?
+    isVegetarianOnly     Boolean   @default(false)
+    isActive             Boolean   @default(false)
+    verificationStatus   String?
+    rejectionReason      String?
+    verificationDocument Document?
 
     //relationships to other key models
     menus              RestaurentMenu?
@@ -465,4 +467,21 @@ model WishListItem {
     updatedAt DateTime @default(now())
 
     @@unique([userId, serviceId])
+}
+
+model Document {
+    id                     String   @id @default(auto()) @map("_id") @db.ObjectId
+    serviceId              String   @db.ObjectId
+    service                Services @relation(fields: [serviceId], references: [id])
+    serviceLicenceNumber   String
+    panCard                String
+    GSTINCertificate       String?
+    AccountHolderName      String
+    AccountNumber          String
+    IFSCCode               String
+    ProofOfOwnerShip       String?
+    OwnerGovernmentIssueId String //eg adharCard,pancard etc
+    OwnerImage             String
+
+    @@unique([serviceId])
 }

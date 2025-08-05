@@ -3,7 +3,10 @@ import { servicesEntity } from "../entities/Services.entity";
 import prisma from "@/lib/prisma";
 
 export interface IServiceRepository {
-  createService(data: servicesDto): Promise<servicesEntity>;
+  createService(
+    data: servicesDto,
+    categoryName: string
+  ): Promise<servicesEntity>;
   updateService(id: string, data: servicesDto): Promise<servicesEntity>;
   findServiceById(id: string): Promise<servicesEntity>;
   findAllServices(): Promise<servicesEntity[]>;
@@ -31,6 +34,7 @@ export class ServicesRepository implements IServiceRepository {
       },
       include: {
         additionalImages: true,
+        verificationDocument: true,
       },
     });
     return services as servicesEntity[];
@@ -41,6 +45,7 @@ export class ServicesRepository implements IServiceRepository {
       where: { id },
       include: {
         additionalImages: true,
+        verificationDocument: true,
         category: true,
         menus: true,
         orders: true,
@@ -57,17 +62,40 @@ export class ServicesRepository implements IServiceRepository {
         menus: true,
         orders: true,
         additionalImages: true,
+        verificationDocument: true,
       },
     });
     return services as servicesEntity[];
   }
-  async createService(data: servicesDto): Promise<servicesEntity> {
-    const { additionalImages, categoryId, ownerId, ...otherServiceData } = data;
+  async createService(
+    data: servicesDto,
+    categoryName: string
+  ): Promise<servicesEntity> {
+    const {
+      additionalImages,
+      categoryId,
+      verificationDocument,
+      ownerId,
+      ...otherServiceData
+    } = data;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dataForPrisma: any = {
       ...otherServiceData, // Spreads all simple fields like name, address, etc.
-
+      categoryName: categoryName,
+      verificationDocument: {
+        create: {
+          serviceLicenceNumber: verificationDocument.serviceLicenceNumber,
+          panCard: verificationDocument.panCard,
+          GSTINCertificate: verificationDocument.GSTINCertificate,
+          AccountHolderName: verificationDocument.AccountHolderName,
+          AccountNumber: verificationDocument.AccountNumber,
+          IFSCCode: verificationDocument.IFSCCode,
+          ProofOfOwnerShip: verificationDocument.ProofOfOwnerShip,
+          OwnerGovernmentIssueId: verificationDocument.OwnerGovernmentIssueId,
+          OwnerImage: verificationDocument.OwnerImage,
+        },
+      },
       owner: {
         connect: {
           id: ownerId,
@@ -88,17 +116,38 @@ export class ServicesRepository implements IServiceRepository {
       data: dataForPrisma,
       include: {
         additionalImages: true,
+        verificationDocument: true,
       },
     });
     return newService as servicesEntity;
   }
 
-  async updateService(id: string, data: servicesDto): Promise<servicesEntity> {
-    const { additionalImages, ...otherUpdateData } = data;
+  async updateService(
+    id: string,
+    data: Partial<servicesDto>
+  ): Promise<servicesEntity> {
+    const { additionalImages, verificationDocument, ...otherUpdateData } = data;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dataForPrisma: any = {
       ...otherUpdateData,
     };
+    if (verificationDocument) {
+      dataForPrisma.verificationDocument = {
+        update: {
+          data: {
+            serviceLicenceNumber: verificationDocument.serviceLicenceNumber,
+            panCard: verificationDocument.panCard,
+            GSTINCertificate: verificationDocument.GSTINCertificate,
+            AccountHolderName: verificationDocument.AccountHolderName,
+            AccountNumber: verificationDocument.AccountNumber,
+            IFSCCode: verificationDocument.IFSCCode,
+            ProofOfOwnerShip: verificationDocument.ProofOfOwnerShip,
+            OwnerGovernmentIssueId: verificationDocument.OwnerGovernmentIssueId,
+            OwnerImage: verificationDocument.OwnerImage,
+          },
+        },
+      };
+    }
     if (additionalImages !== undefined) {
       dataForPrisma.additionalImages = {
         set: additionalImages.map((image) => ({ url: image.url })),
@@ -109,6 +158,7 @@ export class ServicesRepository implements IServiceRepository {
       data: dataForPrisma,
       include: {
         additionalImages: true,
+        verificationDocument: true,
       },
     });
     return updateService as servicesEntity;
@@ -124,6 +174,7 @@ export class ServicesRepository implements IServiceRepository {
       include: {
         category: true,
         additionalImages: true,
+        verificationDocument: true,
       },
     });
     return service as servicesEntity[];
@@ -142,6 +193,7 @@ export class ServicesRepository implements IServiceRepository {
       include: {
         category: true,
         additionalImages: true,
+        verificationDocument: true,
       },
     });
     return services as servicesEntity[];

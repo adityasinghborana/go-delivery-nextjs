@@ -15,13 +15,17 @@ export class ServiceUsecase {
     if (!category) {
       throw new Error("The selected category does not exist.");
     }
+    const categoryName = category.name;
     const cleanedName = data.name.trim();
     const dataToSave = {
       ...data,
       name: cleanedName,
       ownerId: ownerId,
     };
-    const newService = await this.servicesRepository.createService(dataToSave);
+    const newService = await this.servicesRepository.createService(
+      dataToSave,
+      categoryName
+    );
     return newService;
   }
   async updateServiceUsecase(
