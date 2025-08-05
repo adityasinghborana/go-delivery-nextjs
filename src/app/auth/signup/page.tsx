@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -11,7 +10,6 @@ export default function Signup() {
     name: "",
     phone: "",
   });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
