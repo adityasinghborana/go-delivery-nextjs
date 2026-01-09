@@ -2,10 +2,8 @@ import { NextResponse, NextRequest } from "next/server";
 import { CategoryRepository } from "@/core/repositories/ICategoryRepository";
 import { CategoryUsecase } from "@/core/usecases/Category.usecase";
 import { CategoryDTO } from "@/core/dtos/Category.dto";
-
 const categoryRepository = new CategoryRepository();
 const categoryUsecase = new CategoryUsecase(categoryRepository);
-
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
